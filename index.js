@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
 const bot = new Discord.Client();
 
-const token = 'NzIzNTM3NzIwMTk4MDM3NTA0.XuzFAw.y3685c46AUT7QWaykVDoFLSMRZI';
+const token = 'NzIzNTM3NzIwMTk4MDM3NTA0.XuzFAw.FsWZe8Jb7QrnXt51Ju9xVm0gKH4';
 
 const PREFIX = "-"
 
@@ -17,6 +17,8 @@ bot.on('message', message=>{
     //    msg.reply('Hello friend!');
     //}
     let args = message.content.substring(PREFIX.length).split(" ");    
+
+    let url = ''
 
     switch(args[0]){
         case 'ping':
@@ -57,8 +59,11 @@ bot.on('message', message=>{
             }
 
             break;
+        case 'pone':
+            
 
         case 'reprod': 
+
             if(!args[1]){
                 message.channel.send('Falta link bro');
                 return;
@@ -86,32 +91,14 @@ bot.on('message', message=>{
 
             //const url = args[1]
         break;
-        case 'nashe':
-            /* if(!args[1]){
-                message.channel.send('Falta link bro');
-                return;
-            } */
-
-            //Chequeo si esta en el channel
-            if(!message.member.voice.channel){
-                message.channel.send('Tenes que estar en el canal de voz para usar ese comando');
-                return;
-            }
-
-            if (!servers[message.guild.id]) servers[message.guild.id] = {
-                queue: []
-            }
-
-            var server = servers[message.guild.id];
-
-            server.queue.push(args[1]);
-            
-            //Si el bot no esta en el voicechannel que se una
-            //if(!message.guild.voice.connection) message.member.voice.channel.join().then(function(connection){
-            if(!message.member.voice.connection) message.member.voice.channel.join().then(function(connection){
-                playUrl(connection,message);
-            })
+        case 'nashe': 
+        url = 'https://www.youtube.com/watch?v=GOqYM1eR6bg';
+        doTheThing(message,args,url);           
             break;
+        case 'puedeSerPa':
+        url = 'https://www.youtube.com/watch?v=57eXy6vsG8I';
+        doTheThing(message,args,url);
+        break;
     }
         
 
@@ -136,18 +123,38 @@ function play(connection,message){
     });
 }
 
-function playUrl(connection,message){
+function playUrl(connection,message,url){
     var server = servers[message.guild.id];
 
-    server.dispatcher = connection.play(ytdl('https://www.youtube.com/watch?v=GOqYM1eR6bg',{filter: "audioonly"}));                
+    server.dispatcher = connection.play(ytdl(url,{filter: "audioonly"}));                
 
     server.queue.shift();
 
     server.dispatcher.on("end", function(){
         if(server.queue[0]){
-            play(connection,message);
+            playUrl(connection,message,url);
         }else{
             connection.disconnect();
         }
     });
+}
+
+function doTheThing(message, args, url){
+    if(!message.member.voice.channel){
+        message.channel.send('Tenes que estar en el canal de voz para usar ese comando');
+        return;
+    }
+
+    if (!servers[message.guild.id]) servers[message.guild.id] = {
+        queue: []
+    }
+
+    var server = servers[message.guild.id];
+
+    server.queue.push(args[1]);
+    
+    //Si el bot no esta en el voicechannel que se una            
+    if(!message.member.voice.connection) message.member.voice.channel.join().then(function(connection){
+        playUrl(connection,message,url);
+    })
 }
